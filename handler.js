@@ -26,6 +26,8 @@ const pluginData = [
 
 const { getCurrentWPVer, getCurrentPluginVer } = require('./helpers');
 const request = require('axios');
+const AWS = require('aws-sdk');
+const dynamo = new AWS.DynamoDB.DocumentClient();
 let pluginsToday, wpToday, pluginsYesterday, wpYesterday;
 
 export const hello = async (event, context, callback) => {
@@ -40,12 +42,50 @@ export const hello = async (event, context, callback) => {
   response.wp = wpToday;
 
   //get yesterday db data
+  const yesterdayDataFromDb = await dynamo.scan({
+    TableName: 'wpversions'
+  }).promise();
+
+  pluginsYesterday = yesterdayDataFromDb.Items[0].data.plugins
+  wpYesterday = yesterdayDataFromDb.Items[0].data.wp
+  const yesterdayId = yesterdayDataFromDb.Items[0].listingId
+
+  console.log('plugins yesterday')
+  console.log(pluginsYesterday)
+  console.log('wp core yesterday')
+  console.log(wpYesterday)
+  console.log('id yesterday')
+  console.log(yesterdayId)
 
   //compare data
 
   //if data differ SNS
 
-  //delete old & save new data
+
+  //delete old data
+  await dynamo.delete({
+    TableName: 'wpversions',
+    Key: {
+      listingId: yesterdayId
+    }
+  }).promise()
+
+  //save new data
+  const totalData = {
+    wp: wpToday,
+    plugins: pluginsToday
+  }
+
+  await dynamo.put({
+    TableName: 'wpversions',
+    Item: {
+      listingId: new Date().toString(),
+      data: totalData
+    }
+  }).promise()
+
+
+
 
   callback(null, response);
 };
