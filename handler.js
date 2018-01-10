@@ -26,7 +26,7 @@ const pluginData = [
 
 const { getCurrentWPVer, getCurrentPluginVer } = require('./helpers');
 const request = require('axios');
-const pluginsToday, wpToday, pluginsYesterday, wpYesterday;
+let pluginsToday, wpToday, pluginsYesterday, wpYesterday;
 
 export const hello = async (event, context, callback) => {
   const response = {

@@ -22,3 +22,43 @@ functions:
       - http:
           path: hello
           method: get
+
+
+resources:
+  Resources:
+    wpversions:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: wpversions
+        AttributeDefinitions:
+          - AttributeName: listingId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: listingId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    # A policy is a resource that states one or more permssions. It lists actions, resources and effects.
+
+    DynamoDBIamPolicy:
+      Type: AWS::IAM::Policy
+      DependsOn: wpversions
+      Properties:
+        PolicyName: lambda-dynamodb
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeTable
+                - dynamodb:Query
+                - dynamodb:Scan
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+              Resource: arn:aws:dynamodb:*:*:table/wpversions
+        Roles:
+          - Ref: IamRoleLambdaExecution
