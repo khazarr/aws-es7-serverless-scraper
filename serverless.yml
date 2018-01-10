@@ -1,0 +1,24 @@
+# NOTE: update this with your service name
+service: scrape-v2
+
+# Use the serverless-webpack plugin to transpile ES6
+plugins:
+  - serverless-webpack
+
+# Enable auto-packing of external modules
+custom:
+  webpackIncludeModules: true
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: dev
+  region: us-east-1
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
