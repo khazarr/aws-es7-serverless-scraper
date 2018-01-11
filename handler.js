@@ -99,8 +99,7 @@ export const hello = async (event, context, callback) => {
 
   let bodyOfResponse = totalData
   bodyOfResponse.timestamp = new Date().toString()
-  // let bodyOfResponse = JSON.stringify(totalData)
-  response.body = bodyOfResponse
+  response.body = JSON.stringify(bodyOfResponse)
 
   callback(null, response);
 };
