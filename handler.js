@@ -41,10 +41,7 @@ export const hello = async (event, context, callback) => {
   };
 
   pluginsToday = await getAllPluginsVersion(pluginData)
-  response.plugins = pluginsToday
-
   wpToday = await getWpVer()
-  response.wp = wpToday;
 
   // get yesterday db data
   const yesterdayDataFromDb = await dynamo.scan({
@@ -100,6 +97,10 @@ export const hello = async (event, context, callback) => {
     }
   }).promise()
 
+  let bodyOfResponse = totalData
+  bodyOfResponse.timestamp = new Date().toString()
+  // let bodyOfResponse = JSON.stringify(totalData)
+  response.body = bodyOfResponse
 
   callback(null, response);
 };
