@@ -41,10 +41,10 @@ export const hello = async (event, context, callback) => {
   };
 
   pluginsToday = await getAllPluginsVersion(pluginData)
-  // response.plugins = pluginsToday
+  response.plugins = pluginsToday
 
   wpToday = await getWpVer()
-  // response.wp = wpToday;
+  response.wp = wpToday;
 
   // get yesterday db data
   const yesterdayDataFromDb = await dynamo.scan({
@@ -55,19 +55,10 @@ export const hello = async (event, context, callback) => {
   wpYesterday = yesterdayDataFromDb.Items[0].data.wp
   const yesterdayId = yesterdayDataFromDb.Items[0].listingId
 
-  // console.log('plugins yesterday')
-  // console.log(pluginsYesterday)
-  // console.log('wp core yesterday')
-  // console.log(wpYesterday)
-  // console.log('id yesterday')
-  // console.log(yesterdayId)
-
-
   //compare wp wer
   changeInWpCore = wpYesterday != wpToday ? true : false;
 
   if (changeInWpCore) {
-    console.log('byla zmiana w wp core')
     const msg = {
       text: 'WP-core have an update!',
       wpVer: wpToday
@@ -108,8 +99,6 @@ export const hello = async (event, context, callback) => {
       data: totalData
     }
   }).promise()
-
-
 
 
   callback(null, response);
