@@ -29,6 +29,7 @@
     "babel-runtime": "^6.26.0",
     "cheerio": "^1.0.0-rc.2",
     "jest": "^21.2.1",
+    "lodash": "^4.17.4",
     "source-map-support": "^0.4.18"
   }
 }

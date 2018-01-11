@@ -25,10 +25,15 @@ const pluginData = [
 
 
 const { getCurrentWPVer, getCurrentPluginVer } = require('./helpers');
+const { sendHipchatMsg } = require('./messages')
 const request = require('axios');
 const AWS = require('aws-sdk');
 const dynamo = new AWS.DynamoDB.DocumentClient();
-let pluginsToday, wpToday, pluginsYesterday, wpYesterday;
+const { differenceWith, isEqual } = require('lodash');
+
+let pluginsToday, wpToday, pluginsYesterday, wpYesterday, changeInPlugins;
+let changeInWpCore = false
+
 
 export const hello = async (event, context, callback) => {
   const response = {
@@ -36,12 +41,12 @@ export const hello = async (event, context, callback) => {
   };
 
   pluginsToday = await getAllPluginsVersion(pluginData)
-  response.plugins = pluginsToday
+  // response.plugins = pluginsToday
 
   wpToday = await getWpVer()
-  response.wp = wpToday;
+  // response.wp = wpToday;
 
-  //get yesterday db data
+  // get yesterday db data
   const yesterdayDataFromDb = await dynamo.scan({
     TableName: 'wpversions'
   }).promise();
@@ -50,16 +55,36 @@ export const hello = async (event, context, callback) => {
   wpYesterday = yesterdayDataFromDb.Items[0].data.wp
   const yesterdayId = yesterdayDataFromDb.Items[0].listingId
 
-  console.log('plugins yesterday')
-  console.log(pluginsYesterday)
-  console.log('wp core yesterday')
-  console.log(wpYesterday)
-  console.log('id yesterday')
-  console.log(yesterdayId)
+  // console.log('plugins yesterday')
+  // console.log(pluginsYesterday)
+  // console.log('wp core yesterday')
+  // console.log(wpYesterday)
+  // console.log('id yesterday')
+  // console.log(yesterdayId)
 
-  //compare data
 
-  //if data differ SNS
+  //compare wp wer
+  changeInWpCore = wpYesterday != wpToday ? true : false;
+
+  if (changeInWpCore) {
+    console.log('byla zmiana w wp core')
+    const msg = {
+      text: 'WP-core have an update!',
+      wpVer: wpToday
+    }
+    sendHipchatMsg(JSON.stringify(msg))
+  }
+
+  // compare plugins
+  changeInPlugins = differenceWith(pluginsToday,pluginsYesterday,isEqual)
+
+  if (changeInPlugins.length) {
+    const msg = {
+      text: 'Some Plugins have an update!',
+      plugins: changeInPlugins
+    }
+    sendHipchatMsg(JSON.stringify(msg))
+  }
 
 
   //delete old data
